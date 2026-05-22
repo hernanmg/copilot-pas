@@ -1,0 +1,78 @@
+services:
+  copilot_db:
+    # Imagen con extensión pgvector para embeddings RAG (LangChain + Postgres)
+    image: pgvector/pgvector:pg16
+    container_name: copilot_seguros_db
+    environment:
+      POSTGRES_USER: copilot
+      POSTGRES_PASSWORD: copilot_pass
+      POSTGRES_DB: copilot_seguros
+    ports:
+      - "5433:5432"
+    volumes:
+      - copilot_db_data:/var/lib/postgresql/data
+      - ./backend/db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - copilot_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U copilot -d copilot_seguros -h 127.0.0.1 -p 5432"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  copilot_redis:
+    image: redis:7
+    container_name: copilot_seguros_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6380:6379"
+    networks:
+      - copilot_net
+
+  copilot_backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: copilot_seguros_backend
+    depends_on:
+      copilot_db:
+        condition: service_healthy
+      copilot_redis:
+        condition: service_started
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      JWT_SECRET: dev-jwt-secret-cambiar-en-produccion
+      DB_HOST: copilot_db
+      DB_PORT: 5432
+      DB_USER: copilot
+      DB_PASSWORD: copilot_pass
+      DB_NAME: copilot_seguros
+      REDIS_HOST: copilot_redis
+      REDIS_PORT: 6379
+    ports:
+      - "4000:4000"
+    networks:
+      - copilot_net
+
+  copilot_frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: copilot_seguros_frontend
+    depends_on:
+      - copilot_backend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+    networks:
+      - copilot_net
+
+volumes:
+  copilot_db_data:
+
+networks:
+  copilot_net:
+    driver: bridge
+

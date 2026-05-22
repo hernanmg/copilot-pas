@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  color: #f1f5f9;
+  background-color: #030712;
+  background-image:
+    radial-gradient(ellipse 100% 80% at 50% -30%, rgba(16, 185, 129, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 10%, rgba(56, 189, 248, 0.08), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(167, 139, 250, 0.06), transparent 45%);
+  background-attachment: fixed;
+}
+
+/* Patrón sutil para dar profundidad */
+body::before {
+  content: '';
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+@layer utilities {
+  .dashboard-main {
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-title {
+    @apply text-lg font-bold tracking-tight text-white sm:text-xl;
+  }
+
+  .section-kicker {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400;
+  }
+
+  .section-sub {
+    @apply mt-1 text-sm leading-relaxed text-slate-300/90;
+  }
+
+  .section-rule {
+    @apply mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-emerald-500 via-emerald-400/80 to-transparent;
+  }
+
+  .card-surface {
+    @apply rounded-2xl border border-slate-700/60 bg-slate-900/50 backdrop-blur-md;
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 18px 45px -15px rgba(16, 185, 129, 0.12);
+  }
+
+  .float-card {
+    @apply relative overflow-hidden rounded-2xl border border-slate-600/40 bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-950 p-5 backdrop-blur-md transition duration-300;
+    box-shadow:
+      0 10px 40px -10px rgb(0 0 0 / 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.07) inset,
+      0 22px 50px -20px rgba(16, 185, 129, 0.18);
+  }
+
+  .float-card::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      transparent 42%,
+      transparent 100%
+    );
+  }
+
+  .float-card:hover {
+    @apply -translate-y-1 border-emerald-500/35;
+    box-shadow:
+      0 16px 50px -12px rgb(0 0 0 / 0.55),
+      0 0 0 1px rgba(16, 185, 129, 0.25) inset,
+      0 28px 60px -18px rgba(16, 185, 129, 0.28);
+  }
+
+  .float-card-muted {
+    @apply border-slate-700/50 shadow-none;
+    box-shadow: 0 8px 30px -8px rgb(0 0 0 / 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  }
+
+  .float-card-muted:hover {
+    @apply translate-y-0 border-slate-600/50;
+  }
+
+  .kpi-value {
+    @apply relative z-[1] text-3xl font-bold tracking-tight tabular-nums text-white;
+  }
+
+  .kpi-label {
+    @apply relative z-[1] text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400;
+  }
+
+  .kpi-hint {
+    @apply relative z-[1] mt-1 text-xs leading-snug text-slate-400;
+  }
+
+  .input-producer {
+    @apply rounded-lg border border-slate-700/80 bg-slate-950/90 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-emerald-500/70 focus:ring-2 focus:ring-emerald-500/25;
+  }
+
+  .quick-card {
+    @apply relative overflow-hidden rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/70 to-slate-950/90 p-4 backdrop-blur-sm transition duration-300;
+    box-shadow: 0 10px 35px -12px rgb(0 0 0 / 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  }
+
+  .quick-card:hover {
+    @apply -translate-y-0.5 border-slate-500/40;
+    box-shadow:
+      0 18px 45px -15px rgb(0 0 0 / 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+      0 0 40px -10px rgba(16, 185, 129, 0.15);
+  }
+
+  .dashboard-section-panel {
+    @apply rounded-2xl border border-slate-700/50 bg-slate-950/55 p-6 shadow-[0_4px_40px_-12px_rgba(0,0,0,0.45),inset_0_1px_0_0_rgba(255,255,255,0.05)] backdrop-blur-sm md:p-8;
+  }
+}
+
+/* Respaldo sin Tailwind: el menú lateral nunca se aplana en una sola línea */
+.producer-nav-link {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  text-decoration: none;
+}
+.producer-shell-sidebar nav ul li {
+  display: block;
+  width: 100%;
+}
