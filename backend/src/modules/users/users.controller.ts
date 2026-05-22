@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -14,13 +15,10 @@ export class UsersController {
   @Post()
   async create(
     @Body() dto: CreateUserDto,
-    @Headers('x-tenant-id') tenantId?: string,
+    @CurrentTenant() tenantId: string,
   ) {
-    const effectiveTenantId = tenantId || '00000000-0000-0000-0000-000000000000';
-    const user = await this.usersService.create(effectiveTenantId, dto);
-    // Nunca devolvemos passwordHash
+    const user = await this.usersService.create(tenantId, dto);
     const { passwordHash, ...safe } = user as any;
     return safe;
   }
 }
-

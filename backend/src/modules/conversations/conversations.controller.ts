@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -13,8 +12,7 @@ import { ConversationsService } from './conversations.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
-
-const DUMMY_TENANT_ID = '00000000-0000-0000-0000-000000000000';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 
 @Controller('conversations')
 export class ConversationsController {
@@ -22,28 +20,28 @@ export class ConversationsController {
 
   @Get()
   async list(
-    @Headers('x-tenant-id') tenantId: string | undefined,
+    @CurrentTenant() tenantId: string,
     @Query('status') status?: string,
     @Query('channel') channel?: string,
   ) {
-    return this.conversationsService.list(tenantId || DUMMY_TENANT_ID, { status, channel });
+    return this.conversationsService.list(tenantId, { status, channel });
   }
 
   @Post()
   async create(
     @Body() dto: CreateConversationDto,
-    @Headers('x-tenant-id') tenantId: string | undefined,
+    @CurrentTenant() tenantId: string,
   ) {
-    return this.conversationsService.create(tenantId || DUMMY_TENANT_ID, dto);
+    return this.conversationsService.create(tenantId, dto);
   }
 
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateConversationDto,
-    @Headers('x-tenant-id') tenantId: string | undefined,
+    @CurrentTenant() tenantId: string,
   ) {
-    return this.conversationsService.update(tenantId || DUMMY_TENANT_ID, id, dto);
+    return this.conversationsService.update(tenantId, id, dto);
   }
 
   @Get(':id/messages')
@@ -55,12 +53,8 @@ export class ConversationsController {
   async addMessage(
     @Param('id') conversationId: string,
     @Body() dto: CreateMessageDto,
-    @Headers('x-tenant-id') tenantId: string | undefined,
+    @CurrentTenant() tenantId: string,
   ) {
-    return this.conversationsService.addMessage(
-      tenantId || DUMMY_TENANT_ID,
-      conversationId,
-      dto,
-    );
+    return this.conversationsService.addMessage(tenantId, conversationId, dto);
   }
 }

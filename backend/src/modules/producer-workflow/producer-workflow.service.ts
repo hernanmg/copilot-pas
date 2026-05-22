@@ -6,8 +6,6 @@ import { ApprovalRequest } from './approval-request.entity';
 import { WorkTask } from './work-task.entity';
 import type { UpdateTaskDto } from './dto/update-task.dto';
 
-const DUMMY_TENANT_ID = '00000000-0000-0000-0000-000000000000';
-
 export type ProducerMetricsDto = {
   pendingApprovals: number;
   slaOverdue: number;
@@ -24,21 +22,16 @@ export class ProducerWorkflowService {
     private readonly usersService: UsersService,
   ) {}
 
-  resolveTenant(tenantId?: string): string {
-    return tenantId?.trim() || DUMMY_TENANT_ID;
-  }
-
-  async getMetrics(tenantId?: string): Promise<ProducerMetricsDto> {
-    const tid = this.resolveTenant(tenantId);
+  async getMetrics(tenantId: string): Promise<ProducerMetricsDto> {
     const now = new Date();
 
     const pendingApprovals = await this.approvalRepo.count({
-      where: { tenantId: tid, status: 'PENDING' },
+      where: { tenantId, status: 'PENDING' },
     });
 
     const slaOverdue = await this.taskRepo
       .createQueryBuilder('t')
-      .where('t.tenant_id = :tid', { tid })
+      .where('t.tenant_id = :tenantId', { tenantId })
       .andWhere('t.status IN (:...open)', { open: ['OPEN', 'IN_PROGRESS'] })
       .andWhere('t.due_at IS NOT NULL')
       .andWhere('t.due_at < :now', { now })
@@ -46,7 +39,7 @@ export class ProducerWorkflowService {
 
     const openTasks = await this.taskRepo
       .createQueryBuilder('t')
-      .where('t.tenant_id = :tid', { tid })
+      .where('t.tenant_id = :tenantId', { tenantId })
       .andWhere('t.status IN (:...st)', { st: ['OPEN', 'IN_PROGRESS'] })
       .getCount();
 
@@ -54,18 +47,16 @@ export class ProducerWorkflowService {
   }
 
   async listApprovals(tenantId: string) {
-    const tid = this.resolveTenant(tenantId);
     return this.approvalRepo.find({
-      where: { tenantId: tid },
+      where: { tenantId },
       order: { createdAt: 'DESC' },
     });
   }
 
   async listTasks(tenantId: string, overdueOnly?: boolean) {
-    const tid = this.resolveTenant(tenantId);
     const qb = this.taskRepo
       .createQueryBuilder('t')
-      .where('t.tenant_id = :tid', { tid })
+      .where('t.tenant_id = :tenantId', { tenantId })
       .andWhere('t.status IN (:...st)', { st: ['OPEN', 'IN_PROGRESS'] })
       .orderBy('t.due_at', 'ASC')
       .addOrderBy('t.created_at', 'DESC');
@@ -78,9 +69,8 @@ export class ProducerWorkflowService {
     return qb.getMany();
   }
 
-  async decideApproval(tenantId: string | undefined, id: string, status: 'APPROVED' | 'REJECTED') {
-    const tid = this.resolveTenant(tenantId);
-    const row = await this.approvalRepo.findOne({ where: { id, tenantId: tid } });
+  async decideApproval(tenantId: string, id: string, status: 'APPROVED' | 'REJECTED') {
+    const row = await this.approvalRepo.findOne({ where: { id, tenantId } });
     if (!row) throw new NotFoundException('Solicitud no encontrada');
     if (row.status !== 'PENDING') {
       throw new BadRequestException('Solo se puede aprobar o rechazar solicitudes en estado PENDING');
@@ -89,16 +79,15 @@ export class ProducerWorkflowService {
     return this.approvalRepo.save(row);
   }
 
-  async updateTask(tenantId: string | undefined, id: string, dto: UpdateTaskDto) {
-    const tid = this.resolveTenant(tenantId);
-    const task = await this.taskRepo.findOne({ where: { id, tenantId: tid } });
+  async updateTask(tenantId: string, id: string, dto: UpdateTaskDto) {
+    const task = await this.taskRepo.findOne({ where: { id, tenantId } });
     if (!task) throw new NotFoundException('Tarea no encontrada');
 
     if (dto.assigneeUserId !== undefined) {
       if (dto.assigneeUserId === null) {
         task.assigneeUserId = null;
       } else {
-        await this.usersService.assertUserBelongsToTenant(tid, dto.assigneeUserId);
+        await this.usersService.assertUserBelongsToTenant(tenantId, dto.assigneeUserId);
         task.assigneeUserId = dto.assigneeUserId;
       }
     }
@@ -122,7 +111,7 @@ export class ProducerWorkflowService {
     return this.taskRepo.save(task);
   }
 
-  listAssignableUsers(tenantId?: string) {
-    return this.usersService.listActiveByTenant(this.resolveTenant(tenantId));
+  listAssignableUsers(tenantId: string) {
+    return this.usersService.listActiveByTenant(tenantId);
   }
 }

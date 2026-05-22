@@ -1,27 +1,25 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { OrchestratorChatDto } from './dto/orchestrator-chat.dto';
 import { OrchestratorService } from './orchestrator.service';
+import { Public } from '../auth/decorators/public.decorator';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 
 @Controller('orchestrator')
 export class OrchestratorController {
   constructor(private readonly orchestratorService: OrchestratorService) {}
 
+  @Public()
   @Post('whatsapp/webhook')
   async handleWhatsappWebhook(@Body() payload: any) {
-    // Stub para pruebas locales: solo loguea y responde 200.
-    return {
-      received: true,
-      payload
-    };
+    // Stub: webhook externo no porta JWT; autenticación vía signature pendiente.
+    return { received: true, payload };
   }
 
   @Post('chat')
   async chat(
     @Body() dto: OrchestratorChatDto,
-    @Headers('x-tenant-id') tenantIdHeader?: string,
+    @CurrentTenant() tenantId: string,
   ) {
-    const tenantId =
-      dto.tenantId || tenantIdHeader || '00000000-0000-0000-0000-000000000000';
     return this.orchestratorService.chat({
       tenantId,
       channel: dto.channel || 'WEB',
@@ -30,4 +28,3 @@ export class OrchestratorController {
     });
   }
 }
-

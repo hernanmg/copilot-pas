@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RedisModule } from './infra/redis/redis.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { UsersModule } from './modules/users/users.module';
@@ -16,6 +18,7 @@ import { ProducerWorkflowModule } from './modules/producer-workflow/producer-wor
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
+  providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
