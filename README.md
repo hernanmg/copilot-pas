@@ -103,6 +103,46 @@ DEMO_EMAIL=otro@tenant.com DEMO_PASSWORD=pass123 npm run warmup
 - **Backend**: `cd backend && npm install && npm run start:dev` (Postgres y Redis accesibles según `.env`).  
 - **Frontend**: `cd frontend && npm install && npm run dev` — definí `NEXT_PUBLIC_API_BASE_URL` si el API no está en `http://localhost:4000`.
 
+
+## Eliminar y Levantar toda la base de vuelta
+
+Los comandos exactos, en orden:
+
+# 1 — Bajar solo el contenedor de Postgres (deja Redis y lo demás intacto)
+docker stop copilot_seguros_db
+s (requiere que el contenedor esté detenido)
+docker rm copilot_seguros_db
+docker volume rm copilot-seguros_copilot_db_data
+
+# 3 — Volver a levantar; Docker crea el volumen vacío y ejecuta todos
+#     los scripts de backend/db/init/ en orden alfabético automáticamente
+docker compose up -d copilot_db
+
+---
+cker Compose antepone el nombre del directorio raíz al nombre declarado en docker-compose.yml. El directorio es Copilot-Seguros pero Docker lo normaliza a minúsculas sin guion → copilot-seguros, así que el volumen real es copilot-seguros_copilot_db_data.
+
+Si no estás seguro del nombre exacto, verificalo antes del rm:
+
+docker volume ls | findstr copilot
+
+---
+Flujo completo si querés bajar todo el stack y levantar limpio:
+
+docker compose down
+docker volume rm copilot-seguros_copilot_db_data
+docker compose up -d
+
+docker compose down detiene y elimina todos los contenedores pero no borra los volúmenes (por diseño); por eso el volume rm es explícito.
+
+---
+Verificación post-arranque — esperá el healthcheck de Postgres (~10 s) y luecorrieron:
+
+docker exec copilot_seguros_db psql -U copilot -d copilot_seguros -c "\dt"
+
+Deberías ver las tablas (tenants, users, customers, claims, rag_chunks, etc.
+
+cd backend && npm run seed:rag
+
 ## Feedback con un PAS
 
 Convéniente: una sesión de 30–45 minutos recorriendo **Inicio → Clientes → Aseguradoras → Póliza demo → Siniestro (detalle) → Inbox**. Anotá fricciones (“no entiendo X”, “falta Y”, “Z debería ser automático”); con eso se prioriza el siguiente sprint.
@@ -110,3 +150,4 @@ Convéniente: una sesión de 30–45 minutos recorriendo **Inicio → Clientes �
 ## Licencia / estado
 
 Proyecto en evolución; el login y el token son **MVP** para demos, no reemplazan un proveedor de identidad corporativo.
+

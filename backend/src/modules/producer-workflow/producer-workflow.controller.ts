@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApprovalDecisionDto } from './dto/approval-decision.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ProducerWorkflowService } from './producer-workflow.service';
 import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
@@ -30,6 +31,14 @@ export class ProducerWorkflowController {
     @Body() body: ApprovalDecisionDto,
   ) {
     return this.producerWorkflow.decideApproval(tenantId, id, body.status);
+  }
+
+  @Post('tasks')
+  createTask(
+    @CurrentTenant() tenantId: string,
+    @Body() body: CreateTaskDto,
+  ) {
+    return this.producerWorkflow.createTask(tenantId, body);
   }
 
   @Get('tasks')

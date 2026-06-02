@@ -43,6 +43,10 @@ function TasksInner() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [edits, setEdits] = useState<Record<string, { due: string; typ: string }>>({});
+  const [newTitle, setNewTitle] = useState("");
+  const [newType, setNewType] = useState("SEGUIMIENTO");
+  const [newDue, setNewDue] = useState("");
+  const [creating, setCreating] = useState(false);
 
   const loadTasks = useCallback(async () => {
     setLoading(true);
@@ -90,6 +94,34 @@ function TasksInner() {
   useEffect(() => {
     loadTeam();
   }, [loadTeam]);
+
+  async function createTask() {
+    const title = newTitle.trim();
+    if (!title) { setError("El título es obligatorio."); return; }
+    setCreating(true);
+    setError(null);
+    try {
+      // "YYYY-MM-DD" → medianoche hora local (evita desfase UTC que mueve el día)
+      const due = newDue ? new Date(`${newDue}T12:00:00`).toISOString() : null;
+      const res = await apiFetch(
+        "/producer/tasks",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, type: newType.trim() || "TASK", dueAt: due }),
+        },
+        tenantId,
+      );
+      if (!res.ok) throw new Error(await res.text());
+      setNewTitle("");
+      setNewDue("");
+      await loadTasks();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error al crear tarea");
+    } finally {
+      setCreating(false);
+    }
+  }
 
   async function patchTask(id: string, body: Record<string, unknown>) {
     setBusyId(id);
@@ -152,6 +184,61 @@ function TasksInner() {
         </div>
       )}
 
+      <div className="dashboard-section-panel space-y-4">
+        <h2 className="text-lg font-bold text-white">Nueva tarea</h2>
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
+          <div>
+            <label className="kpi-label">Título</label>
+            <input
+              className="input-producer mt-1 w-full"
+              placeholder="Ej: Contactar para renovación SAN-2026-1001"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") void createTask(); }}
+            />
+          </div>
+          <div>
+            <label className="kpi-label">Tipo</label>
+            <select
+              className="input-producer mt-1 w-full"
+              value={newType}
+              onChange={(e) => setNewType(e.target.value)}
+            >
+              <option value="SEGUIMIENTO">SEGUIMIENTO</option>
+              <option value="RENOVACION">RENOVACION</option>
+              <option value="SINIESTRO">SINIESTRO</option>
+              <option value="LLAMADA">LLAMADA</option>
+              <option value="TASK">TASK</option>
+            </select>
+          </div>
+          <div>
+            <label className="kpi-label">Vence (opcional)</label>
+            <input
+              type="date"
+              className="input-producer mt-1 w-full"
+              value={newDue}
+              onChange={(e) => setNewDue(e.target.value)}
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              type="button"
+              onClick={createTask}
+              disabled={creating || !newTitle.trim()}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
+            >
+              {creating && (
+                <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+              Crear tarea
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div className="dashboard-section-panel overflow-hidden p-0">
         <div className="border-b border-slate-700/60 px-6 py-5">
           <h2 className="text-lg font-bold text-white">
@@ -189,7 +276,7 @@ function TasksInner() {
                     <td className="px-5 py-4">
                       {due ? (
                         <span className={isPast ? "font-medium text-rose-300" : "text-slate-400"}>
-                          {due.toLocaleString()}
+                          {due.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" })}
                           {isPast && (
                             <span className="ml-2 rounded-md bg-rose-500/25 px-1.5 py-0.5 text-[10px] font-bold uppercase text-rose-100">
                               SLA

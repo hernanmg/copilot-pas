@@ -206,7 +206,10 @@ export default function PoliciesPage() {
             <thead className="bg-slate-950/60 text-left text-xs font-bold uppercase tracking-wider text-slate-400">
               <tr>
                 <th className="px-5 py-3">Número</th>
-                <th className="px-5 py-3">Aseguradora</th>
+                <th className="px-5 py-3">
+                  Aseguradora
+                  <span className="ml-1 font-normal normal-case tracking-normal text-slate-500">(guarda al cambiar)</span>
+                </th>
                 <th className="px-5 py-3">Estado</th>
                 <th className="px-5 py-3">Inicio</th>
                 <th className="px-5 py-3">Fin</th>
@@ -218,24 +221,32 @@ export default function PoliciesPage() {
                 <tr key={p.id} className="hover:bg-slate-800/40">
                   <td className="px-5 py-3 font-mono text-emerald-300/90">{p.policyNumber}</td>
                   <td className="px-5 py-3">
-                    <select
-                      className="input-producer max-w-[260px] py-1.5 text-xs"
-                      disabled={busyId === p.id}
-                      value={p.insurerId ?? ""}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        patchPolicy(p.id, { insurerId: v === "" ? null : v });
-                      }}
-                      title="Setear insurerId en póliza"
-                    >
-                      <option value="">— Sin aseguradora —</option>
-                      {insurers.map((i) => (
-                        <option key={i.id} value={i.id}>
-                          {i.name}
-                        </option>
-                      ))}
-                    </select>
-                    {insurers.length === 0 ? (
+                    <div className="flex items-center gap-2">
+                      <select
+                        className="input-producer max-w-[220px] py-1.5 text-xs"
+                        disabled={busyId === p.id}
+                        value={p.insurerId ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          patchPolicy(p.id, { insurerId: v === "" ? null : v });
+                        }}
+                        title="Guarda automáticamente al cambiar"
+                      >
+                        <option value="">— Sin aseguradora —</option>
+                        {insurers.map((i) => (
+                          <option key={i.id} value={i.id}>
+                            {i.name}
+                          </option>
+                        ))}
+                      </select>
+                      {busyId === p.id && (
+                        <svg className="h-3.5 w-3.5 shrink-0 animate-spin text-emerald-400" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                      )}
+                    </div>
+                    {insurers.length === 0 && (
                       <div className="mt-1 text-[11px] text-slate-500">
                         No hay aseguradoras. Crealas en{" "}
                         <Link href="/insurers" className="text-emerald-400 hover:text-emerald-300">
@@ -243,12 +254,16 @@ export default function PoliciesPage() {
                         </Link>
                         .
                       </div>
-                    ) : null}
+                    )}
                   </td>
                   <td className="px-5 py-3 text-slate-300">{p.status}</td>
                   <td className="px-5 py-3 text-slate-400">{p.startDate}</td>
                   <td className="px-5 py-3 text-slate-400">{p.endDate}</td>
-                  <td className="px-5 py-3 font-mono text-xs text-slate-500">{p.customerId.slice(0, 8)}…</td>
+                  <td className="px-5 py-3 text-slate-300" title={p.customerId}>
+                    {customers.find((c) => c.id === p.customerId)?.fullName ?? (
+                      <span className="font-mono text-xs text-slate-500">{p.customerId.slice(0, 8)}…</span>
+                    )}
+                  </td>
                 </tr>
               ))}
               {!loading && rows.length === 0 && (

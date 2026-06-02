@@ -1,12 +1,17 @@
-import { IsIn, IsISO8601, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsIn, IsISO8601, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+
+// Acepta cualquier string con forma UUID (8-4-4-4-12 hex), incluidos los UUIDs demo no-v4.
+const UUID_RE = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
 export class StartClaimIntakeDto {
   @IsOptional()
-  @IsUUID()
+  @IsString()
+  @Matches(UUID_RE)
   customerId?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsString()
+  @Matches(UUID_RE)
   policyId?: string;
 }
 
@@ -30,11 +35,13 @@ export class SubmitClaimIntakeStepDto {
   narrative?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsString()
+  @Matches(UUID_RE)
   policyId?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsString()
+  @Matches(UUID_RE)
   customerId?: string;
 }
 

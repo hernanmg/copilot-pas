@@ -184,7 +184,8 @@ export class RagService implements IRagService {
       p++;
     }
     if (input.filters.customerId) {
-      conditions.push(`d.customer_id = $${p}`);
+      // Incluye documentos del cliente Y documentos generales del tenant (customer_id IS NULL).
+      conditions.push(`(d.customer_id = $${p} OR d.customer_id IS NULL)`);
       params.push(input.filters.customerId);
       p++;
     }

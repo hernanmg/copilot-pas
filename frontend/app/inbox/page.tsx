@@ -96,6 +96,7 @@ function InboxInner() {
   const [error, setError] = useState<string | null>(null);
   const [suggestion, setSuggestion] = useState<OrchestratorChatResponse | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [suggesting, setSuggesting] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [channelFilter, setChannelFilter] = useState("");
   const [customers, setCustomers] = useState<{ id: string; fullName: string }[]>([]);
@@ -484,7 +485,7 @@ function InboxInner() {
   async function suggestReply() {
     const lastInbound = [...messages].reverse().find((m) => m.direction === "INBOUND")?.text?.trim();
     const query = lastInbound || "Necesito una sugerencia de respuesta";
-    setLoading(true);
+    setSuggesting(true);
     setError(null);
     setSuggestion(null);
     try {
@@ -506,7 +507,7 @@ function InboxInner() {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Error pidiendo sugerencia");
     } finally {
-      setLoading(false);
+      setSuggesting(false);
     }
   }
 
@@ -750,7 +751,7 @@ function InboxInner() {
                 selectedConversation?.topic ??
                 "Conversación"}
             </div>
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            <div className={`flex shrink-0 flex-wrap items-center justify-end gap-2 transition-opacity${suggesting ? " pointer-events-none opacity-40" : ""}`}>
               <button
                 type="button"
                 onClick={createClaimDraft}
@@ -787,9 +788,15 @@ function InboxInner() {
                 type="button"
                 onClick={suggestReply}
                 disabled={loading || !selectedId}
-                className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-50"
               >
-                Sugerir respuesta
+                {suggesting && (
+                  <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                )}
+                {suggesting ? "Generando…" : "Sugerir respuesta"}
               </button>
               <button
                 type="button"
@@ -862,6 +869,16 @@ function InboxInner() {
           </div>
         </div>
       </div>
+
+      {suggesting && !suggestion && (
+        <div className="card-surface flex items-center gap-3 px-4 py-5 text-sm text-slate-400">
+          <svg className="h-4 w-4 animate-spin shrink-0 text-emerald-400" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          Consultando al asistente y buscando contexto en el knowledge base… puede tardar 15–30 s con Ollama.
+        </div>
+      )}
 
       {suggestion && (
         <div className="card-surface overflow-hidden">

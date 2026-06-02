@@ -54,7 +54,7 @@ async function login(): Promise<string> {
   const res = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: DEMO_EMAIL, password: DEMO_PASSWORD }),
+    body: JSON.stringify({ tenantId: TENANT_ID, email: DEMO_EMAIL, password: DEMO_PASSWORD }),
   });
   if (!res.ok) {
     const text = await res.text();

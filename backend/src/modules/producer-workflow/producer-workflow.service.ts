@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UsersService } from '../users/users.service';
 import { ApprovalRequest } from './approval-request.entity';
 import { WorkTask } from './work-task.entity';
+import type { CreateTaskDto } from './dto/create-task.dto';
 import type { UpdateTaskDto } from './dto/update-task.dto';
 
 export type ProducerMetricsDto = {
@@ -77,6 +78,18 @@ export class ProducerWorkflowService {
     }
     row.status = status;
     return this.approvalRepo.save(row);
+  }
+
+  async createTask(tenantId: string, dto: CreateTaskDto): Promise<WorkTask> {
+    const task = this.taskRepo.create({
+      tenantId,
+      title: dto.title,
+      type: dto.type?.trim() || 'TASK',
+      status: 'OPEN',
+      dueAt: dto.dueAt ? new Date(dto.dueAt) : null,
+      description: dto.description ?? null,
+    });
+    return this.taskRepo.save(task);
   }
 
   async updateTask(tenantId: string, id: string, dto: UpdateTaskDto) {
