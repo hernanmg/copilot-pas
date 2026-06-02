@@ -8,7 +8,9 @@
     "build": "nest build",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",
-    "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run"
+    "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run",
+    "seed:rag": "ts-node --transpile-only scripts/seed-rag-demo.ts",
+    "warmup": "ts-node --transpile-only scripts/warmup-ollama.ts"
   },
   "dependencies": {
     "@langchain/ollama": "^1.2.7",

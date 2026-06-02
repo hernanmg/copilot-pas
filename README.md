@@ -50,6 +50,54 @@ Variable opcional en el API: `JWT_SECRET` (en producción obligatoria; en local 
 | **Agentes** | Playground del orquestador | Mensaje a `POST /orchestrator/chat`; plantillas guardadas en el navegador (`localStorage`). |
 | **Conocimiento (RAG)** | Stats por scope | Lectura de índice; indexación vía API si tenés embeddings configurados. |
 
+## Antes de la demo
+
+Estos pasos cargan el conocimiento demo en el índice RAG y precalientan los modelos Ollama en RAM para evitar latencia de carga durante la demo en vivo.
+
+### Prerrequisitos
+
+- Backend y Postgres corriendo (Docker o local)
+- Ollama instalado y corriendo (`ollama serve`)
+- Modelos descargados:
+  ```bash
+  ollama pull llama3.2          # modelo LLM (classify + generate)
+  ollama pull mxbai-embed-large # modelo de embeddings
+  ```
+
+### 1 · Indexar documentos demo (una vez por DB nueva)
+
+```bash
+cd backend
+npm run seed:rag
+```
+
+Indexa 3 documentos en el knowledge base del tenant demo:
+- **FAQ granizo** — preguntas frecuentes sobre cobertura de granizo en hogar (`FAQ`)
+- **Condiciones generales auto · Sancor** — términos de la póliza de automotor (`INSURER_CONDITIONS`)
+- **Playbook siniestro granizo** — guía interna del productor para gestionar el trámite (`PLAYBOOK`)
+
+El script lee `.env` o `.env.local` y usa las credenciales demo por defecto (`productor@demo.local` / `demo1234`). Tardará ~2–5 minutos dependiendo de la GPU/CPU de Ollama.
+
+### 2 · Precalentar modelos (2–3 minutos antes de cada demo)
+
+```bash
+cd backend
+npm run warmup
+```
+
+Envía una consulta al orquestador y un documento corto al RAG para forzar la carga de `llama3.2` y `mxbai-embed-large` en RAM. Una vez completado el warmup, el primer mensaje del chat tarda < 5 segundos en lugar de 30–90 segundos.
+
+### Variables de entorno para los scripts
+
+Las variables se leen automáticamente de `backend/.env.local` o `backend/.env`. Se pueden sobrescribir desde la shell:
+
+```bash
+BASE_URL=http://mi-servidor:4000 npm run seed:rag
+DEMO_EMAIL=otro@tenant.com DEMO_PASSWORD=pass123 npm run warmup
+```
+
+---
+
 ## Desarrollo local (sin Docker)
 
 - **Backend**: `cd backend && npm install && npm run start:dev` (Postgres y Redis accesibles según `.env`).  

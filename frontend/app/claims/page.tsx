@@ -163,7 +163,7 @@ function ClaimsInner() {
                 <th className="px-4 py-2">Revisión</th>
                 <th className="px-4 py-2">Fecha evento</th>
                 <th className="px-4 py-2">Lugar</th>
-                <th className="px-4 py-2">Claim ID</th>
+                <th className="px-4 py-2">ID siniestro</th>
                 <th className="px-4 py-2"> </th>
               </tr>
             </thead>

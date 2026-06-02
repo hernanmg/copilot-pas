@@ -146,9 +146,9 @@ export default function ClaimIntakePage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-2">Wizard de Siniestro (MVP)</h1>
+      <h1 className="text-2xl font-semibold mb-2">Intake de siniestro</h1>
       <p className="text-sm text-slate-400 mb-6">
-        Guarda estado en Redis y al final crea un `claim` en Postgres.
+        Guarda el progreso en sesión (Redis) y al final crea un borrador de siniestro en base de datos.
       </p>
 
       <div className="border border-slate-800 rounded-lg p-4 bg-slate-900/30 mb-4">
@@ -173,7 +173,7 @@ export default function ClaimIntakePage() {
               disabled={loading}
               className="rounded-md bg-slate-800 px-4 py-2 text-sm disabled:opacity-50"
             >
-              Reset
+              Reiniciar
             </button>
           )}
         </div>
@@ -183,7 +183,7 @@ export default function ClaimIntakePage() {
 
       {!view && (
         <div className="text-sm text-slate-400">
-          Tip: necesitás un `customerId` y `policyId` reales. Podés tomarlos desde DB/DBeaver o crear el customer desde el dashboard.
+          Tip: necesitás un cliente y una póliza existentes. Podés crearlos desde el CRM o usar los datos demo cargados en la base.
         </div>
       )}
 
@@ -250,7 +250,7 @@ export default function ClaimIntakePage() {
                   disabled={loading}
                   className="rounded-md bg-emerald-500 text-slate-900 px-4 py-2 text-sm font-semibold disabled:opacity-50"
                 >
-                  Crear claim (DRAFT)
+                  Crear borrador de siniestro
                 </button>
               </div>
             )}

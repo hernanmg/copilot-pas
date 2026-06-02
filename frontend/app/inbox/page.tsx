@@ -756,9 +756,9 @@ function InboxInner() {
                 onClick={createClaimDraft}
                 disabled={!selectedId || loading || draftBusy}
                 className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-500 disabled:opacity-50"
-                title="Crea un borrador de siniestro desde este chat"
+                title="Inicia el intake de siniestro desde este chat"
               >
-                Crear siniestro
+                Iniciar siniestro
               </button>
               <select
                 className="input-producer max-w-[200px] py-1.5 text-xs"
@@ -796,9 +796,9 @@ function InboxInner() {
                 onClick={() => simulateInbound("Hola! Tengo una consulta…")}
                 disabled={loading || !selectedId}
                 className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-                title="Simula un mensaje entrante del cliente (dev)"
+                title="Simula un mensaje entrante del cliente (demo)"
               >
-                + Inbound
+                + Simular cliente
               </button>
             </div>
           </div>
@@ -902,7 +902,7 @@ function InboxInner() {
             </div>
             <div>
               <div className="mb-2 text-[11px] font-medium uppercase tracking-wide text-slate-500">
-                RAG (chunks)
+                Contexto RAG
               </div>
               <ul className="space-y-2">
                 {(suggestion.rag?.chunks ?? []).slice(0, 4).map((ch, i) => (
@@ -911,15 +911,16 @@ function InboxInner() {
                     className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-3 text-xs"
                   >
                     <div className="mb-1 text-slate-400">
-                      {ch.scope} · score {ch.score.toFixed(3)}
+                      {ch.scope} · relevancia {ch.score.toFixed(3)}
                     </div>
                     <div className="whitespace-pre-wrap text-slate-200">{ch.content.slice(0, 240)}…</div>
                   </li>
                 ))}
                 {(suggestion.rag?.chunks ?? []).length === 0 && (
                   <div className="text-sm text-slate-500">
-                    No hay chunks. Indexá docs vía <code className="rounded bg-slate-800 px-1">/rag/index</code> y
-                    configurá embeddings (OpenAI u Ollama).
+                    Sin contexto indexado. Indexá documentos vía{" "}
+                    <code className="rounded bg-slate-800 px-1">/rag/index</code> y configurá el proveedor
+                    de embeddings (OpenAI u Ollama).
                   </div>
                 )}
               </ul>

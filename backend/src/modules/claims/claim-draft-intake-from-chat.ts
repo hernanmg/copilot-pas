@@ -32,16 +32,22 @@ export function parseInboundForField(fieldKey: ClaimIntakeFieldKey, text: string
     case 'type': {
       const upper = t.toUpperCase();
       if ((CLAIM_TYPES as readonly string[]).includes(upper)) return upper;
-      if (/auto|choque|accidente|veh[ií]culo|colisi[oó]n/i.test(t)) return 'AUTO';
-      if (/hogar|incendio|casa|vivienda|robo/i.test(t)) return 'HOGAR';
+      // AUTO first so "robo de auto" matches AUTO before the HOGAR robo rule
+      if (/auto|choque|accidente|veh[ií]culo|colisi[oó]n|automovilístico/i.test(t)) return 'AUTO';
+      if (/hogar|incendio|casa|vivienda|robo|granizo|inundaci[oó]n|ca[ñn]er[ií]a|ca[ñn]o|pérdida.*agua|agua.*da[ñn]|techo|lluvia/i.test(t)) return 'HOGAR';
       if (/vida|fallec|inci[oó]/i.test(t)) return 'VIDA';
       return 'OTRO';
     }
     case 'eventDatetime': {
       return parseDateTimeLoose(t);
     }
-    case 'eventLocation':
-      return t.length >= 2 ? t : null;
+    case 'eventLocation': {
+      // Short answers (≤80 chars) are direct replies to "¿Dónde fue?" — return verbatim
+      if (t.length <= 80) return t.length >= 2 ? t : null;
+      // Longer free-form text: try to extract "en [lugar]" substring
+      const m = t.match(/\ben\s+(?:el\s+|la\s+|los\s+|las\s+|un\s+|una\s+)?(.{3,70})(?:[,.]|$)/i);
+      return m ? m[1].trim() : t.slice(0, 100);
+    }
     case 'narrative':
       return t.length >= 3 ? t : null;
     default:

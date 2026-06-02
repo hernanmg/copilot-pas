@@ -269,7 +269,7 @@ export default function ClaimDetailPage() {
 
           <div className="card-surface overflow-hidden">
             <div className="border-b border-slate-800/80 px-4 py-3 text-sm font-semibold text-slate-200">
-              Timeline
+              Historial de eventos
             </div>
             <ul className="divide-y divide-slate-800/80">
               {(data?.events ?? []).map((ev) => (

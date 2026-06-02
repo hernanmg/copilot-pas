@@ -601,8 +601,8 @@ export class ClaimsService {
     }
 
     if (!draft.eventDatetime) throw new BadRequestException('Falta fecha del hecho');
-    if (draft.eventDatetime.getTime() > Date.now() + 5 * 60 * 1000) {
-      throw new BadRequestException('La fecha del hecho no puede estar en el futuro');
+    if (draft.eventDatetime.getTime() > Date.now() + 24 * 60 * 60 * 1000) {
+      throw new BadRequestException('La fecha del hecho no puede estar más de 24 horas en el futuro');
     }
 
     const location = (draft.eventLocation ?? '').trim();
