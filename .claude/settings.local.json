@@ -5,7 +5,9 @@
       "mcp__plugin_engram_engram__mem_save",
       "mcp__plugin_engram_engram__mem_judge",
       "mcp__plugin_engram_engram__mem_search",
-      "Bash(docker exec copilot_seguros_db *)"
+      "Bash(docker exec copilot_seguros_db *)",
+      "mcp__plugin_engram_engram__mem_session_summary",
+      "mcp__plugin_engram_engram__mem_context"
     ]
   }
 }

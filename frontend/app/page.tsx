@@ -516,6 +516,8 @@ export default function HomePage() {
           </ul>
         </section>
       </div>
+
+      <HelpSection />
     </div>
   );
 }
@@ -572,5 +574,166 @@ function QuickLink(props: {
         {props.desc}
       </div>
     </Link>
+  );
+}
+
+const HELP_NAV_SECTIONS = [
+  {
+    label: "Inicio",
+    desc: "El panel de control de tu operación: KPIs en vivo, actividad reciente y accesos directos a cada herramienta.",
+    when: "Para arrancar el día y ver de un vistazo qué está pasando en tu agencia.",
+  },
+  {
+    label: "Inbox",
+    desc: "Bandeja de conversaciones con clientes por WhatsApp y otros canales. Podés responder, revisar el historial y gestionar cada hilo desde acá.",
+    when: "Cuando un cliente te escribe o querés hacer seguimiento de una consulta en curso.",
+  },
+  {
+    label: "Clientes",
+    desc: "Tu cartera CRM: ficha de cada asegurado con datos de contacto, pólizas asociadas y búsqueda rápida por nombre o teléfono.",
+    when: "Para buscar, agregar o actualizar información de un cliente.",
+  },
+  {
+    label: "Pólizas",
+    desc: "Listado de todas las pólizas activas, vencidas y próximas a renovar, con número de póliza, estado y fecha de vencimiento.",
+    when: "Para revisar la cartera, detectar renovaciones que se vienen o consultar el estado de una póliza específica.",
+  },
+  {
+    label: "Aseguradoras",
+    desc: "Catálogo de las compañías con las que operás. Desde acá registrás y actualizás cada aseguradora de tu agencia.",
+    when: "Al incorporar una nueva compañía o actualizar sus datos.",
+  },
+  {
+    label: "Siniestros",
+    desc: "Registro y seguimiento de siniestros. Incluye un wizard de carga paso a paso para no omitir ningún dato importante.",
+    when: "Cuando un cliente reporta un siniestro o necesitás ver el estado de uno que está en trámite.",
+  },
+  {
+    label: "Tareas",
+    desc: "Lista de tareas con fechas límite (SLA). Cada tarea tiene responsable, vencimiento y estado de avance.",
+    when: "Para organizar gestiones pendientes y asegurarte de que no se venzan plazos.",
+  },
+  {
+    label: "Aprobaciones",
+    desc: "Cola de solicitudes que necesitan tu aprobación: cotizaciones, endosos y otras gestiones comerciales.",
+    when: "Cuando el sistema o tu equipo generan una solicitud que requiere tu visto bueno.",
+  },
+  {
+    label: "Agentes",
+    desc: "Asistente con inteligencia artificial que entiende consultas en español. Podés hacerle preguntas o pedirle que clasifique una intención.",
+    when: "Para probar el asistente o consultar cómo procesa pedidos de clientes.",
+  },
+  {
+    label: "Conocimiento",
+    desc: "Base de conocimiento de tu agencia (RAG). Subí condiciones generales, circulares o documentos propios para que el asistente los use al responder.",
+    when: "Para alimentar al asistente con información específica de tu agencia o de las compañías con las que trabajás.",
+  },
+] as const;
+
+const HELP_STEPS = [
+  {
+    title: "Cargá tus aseguradoras",
+    desc: "Entrá a Aseguradoras y registrá las compañías con las que operás. Es el primer paso porque pólizas y siniestros las necesitan.",
+  },
+  {
+    title: "Cargá tus clientes",
+    desc: "En Clientes, creá la ficha de cada asegurado con nombre, teléfono y email. Después los vas a vincular a sus pólizas.",
+  },
+  {
+    title: "Registrá las pólizas",
+    desc: "En Pólizas, asociá cada póliza a un cliente y a una aseguradora. Desde acá vas a poder ver renovaciones próximas de un vistazo.",
+  },
+  {
+    title: "Cuando llegue un siniestro, usá el intake",
+    desc: "En Siniestros → Nuevo intake, el wizard te guía paso a paso para cargar toda la información sin saltarte campos importantes.",
+  },
+  {
+    title: "Revisá el Inicio todos los días",
+    desc: "El panel te muestra aprobaciones pendientes, tareas por vencer y renovaciones próximas. Es tu punto de partida para la jornada.",
+  },
+] as const;
+
+function HelpSection() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <section className="border-t border-slate-800/60 pt-6">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-3 rounded-2xl border border-slate-700/50 bg-slate-900/60 px-6 py-4 text-left transition hover:border-slate-600/60 hover:bg-slate-800/50"
+      >
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-600/50 bg-slate-800/80 text-base font-bold text-emerald-300">
+          ?
+        </span>
+        <span className="flex-1 text-base font-semibold text-slate-200">¿Cómo usar la consola?</span>
+        <svg
+          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          aria-hidden
+        >
+          <path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="mt-4 space-y-6">
+          <div className="card-surface p-6">
+            <p className="section-kicker">Para qué sirve</p>
+            <h3 className="section-title mt-1 text-xl">Qué es Copilot Seguros</h3>
+            <p className="section-sub mt-3 max-w-3xl text-base leading-relaxed">
+              Copilot Seguros es tu consola de trabajo como productor o agencia. Desde acá manejás
+              toda la operación diaria: atendés mensajes de clientes, cargás y seguís siniestros,
+              controlás la cartera de pólizas y renovaciones, gestionás aprobaciones y organizás
+              tareas con fecha límite — todo en un solo lugar, sin tener que saltar entre sistemas.
+            </p>
+          </div>
+
+          <div className="card-surface p-6">
+            <p className="section-kicker">Guía del menú</p>
+            <h3 className="section-title mt-1 text-xl">¿Para qué sirve cada sección?</h3>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {HELP_NAV_SECTIONS.map((s) => (
+                <div
+                  key={s.label}
+                  className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" aria-hidden />
+                    <span className="font-semibold text-white">{s.label}</span>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-400">{s.desc}</p>
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    <span className="font-medium text-slate-400">Cuándo usarla:</span> {s.when}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="card-surface p-6">
+            <p className="section-kicker">Por dónde empezar</p>
+            <h3 className="section-title mt-1 text-xl">Flujo típico de uso</h3>
+            <ol className="mt-5 space-y-5">
+              {HELP_STEPS.map((step, i) => (
+                <li key={step.title} className="flex gap-4">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/10 text-sm font-bold text-emerald-300">
+                    {i + 1}
+                  </span>
+                  <div className="pt-0.5">
+                    <div className="font-semibold text-slate-100">{step.title}</div>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-400">{step.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
